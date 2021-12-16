@@ -36,8 +36,9 @@ const HOSTNAME = "$(hostname)";
 CORES=$(nproc);
 CORES=$(($CORES*2));
 
-echo "$#"
-echo "$[$# < 2]"
+if $[1 < $CORES] {
+	echo "$magenta""Multi-core enabled ($CORES threads).""$reset"
+}
 
 proc more_args(N, n, error) {
 	if $[$N < $n] {
