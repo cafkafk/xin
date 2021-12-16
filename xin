@@ -1,0 +1,86 @@
+#!/usr/bin/env oil
+#    xin: My sane NixOS tooling.
+#    Copyright (C) 2021  Christina (cafkafk)
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Affero General Public License as published
+#    by the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Affero General Public License for more details.
+#
+#    You should have received a copy of the GNU Affero General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+shopt -u parse_equals
+
+# ANSI color codes
+var black = $'\u001b[30m'
+var red = $'\u001b[31m'
+var green = $'\u001b[32m'
+var yellow = $'\u001b[33m'
+var blue = $'\u001b[34m'
+var magenta = $'\u001b[35m'
+var cyan = $'\u001b[36m'
+var white = $'\u001b[37m'
+var reset = $'\u001b[0m'
+
+const NIX_DIR = "/etc/nixos";
+const HOSTNAME = "$(hostname)";
+
+# FIXME oil string to int dunno how
+# Also why we need shopt -u parse_equals
+CORES=$(nproc);
+CORES=$(($CORES*2));
+
+echo "$#"
+echo "$[$# < 2]"
+
+proc more_args(N, n, error) {
+	if $[$N < $n] {
+		echo -e "$red$error$reset";
+		exit;
+	}
+}
+
+if test "$1" = "i" {
+	more_args $# 2 "please specify package to install";
+	... nix-env 
+		--cores $CORES 
+		-iA "nixos.$2";
+} elif test "$1" = "iu" {
+	more_args 2 "please specify package to install";
+	... nix-env 
+		--cores $CORES 
+		-f '<nixpkgs-unstable>' 
+		-i "$2";
+} elif test "$1" = "e" {
+	more_args 2 "please specify package to remove";
+	nix-env --cores $CORES -e "$2";
+} elif test "$1" = "r" {
+	... sudo 
+		-E nixos-rebuild switch
+		--cores $CORES
+		--flake "$NIX_DIR#$HOSTNAME";
+} elif test "$1" = "rv" {
+	... sudo 
+		-E nixos-rebuild build-vm
+		--cores $CORES
+		--flake "$NIX_DIR#$HOSTNAME";
+} elif test "$1" = "s" {
+	if ! $[$#>1] {
+		nix-shell --cores $CORES;
+	} else {
+		nix-shell --cores $CORES -p $2;
+	}
+} elif test "$1" = "sp" {
+	if ! $[$#>1] {
+		nix-shell --cores $CORES --pure
+	} else {
+		nix-shell --cores $CORES --pure -p $2
+	}
+}
+
