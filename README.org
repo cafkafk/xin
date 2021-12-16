@@ -1,0 +1,4 @@
+# xin
+NixOS tooling unifyer in oilshell
+
+Super WIP
