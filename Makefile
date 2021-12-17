@@ -1,6 +1,6 @@
 TARGET=xin
 SRC=xin.oil
-PREFIX ?= ~/.local/bin
+PREFIX ?= ~/.local/
 
 VERSION=0.1
 
